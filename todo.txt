@@ -1,5 +1,6 @@
 todo
 
+- wait for response
 - more packets
 - different mutations
 - implement UDP
