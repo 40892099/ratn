@@ -1,5 +1,12 @@
 todo
 
+- configurable percent-mutate
+- different mutate strategies (radamsa)
+
+- backoff/timeout for connect
+- disk full: stop :-/
+- remote ssh process/log watch
+
 - wait for response
 - more packets
 - different mutations
