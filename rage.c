@@ -42,6 +42,7 @@ void usage()
   printf("        -t host          specify target host for fuzzing\n");
   printf("        -s milliseconds  specify a send delay \n");
   printf("        -b               don't fuzz, send original packets and exit \n");
+  printf("        -r               provide a seed for srand (repeat a fuzz run)\n");
   exit(1);
 }
 
@@ -339,7 +340,6 @@ void begin_fuzzer(int portnum, char *target_host)
   } else {
     sprintf(port_print,"%d",portnum);
   }
-  srand(time(NULL));
   printf("[+] beginning fuzz run against: %s:%s\n\n",target_host,port_print);
   while (1)
   {
@@ -389,9 +389,10 @@ int main(int argc, char **argv)
   printf("RAGE AGAINST THE NETWORK\n");
   char *fileName = NULL;
   char *target_host = NULL;
+  int supplied_seed =0;
   int portnum=0;
   int c;
-	while ((c = getopt(argc, argv, "ldbf:p:t:s:")) != -1)
+	while ((c = getopt(argc, argv, "ldbf:p:t:s:r:")) != -1)
 	{
     switch (c)
     {
@@ -417,6 +418,9 @@ int main(int argc, char **argv)
       case 's':
         send_delay = atoi(optarg);
         break;
+      case 'r':
+        supplied_seed=atoi(optarg);
+        break;
       default:
         abort();
     }
@@ -424,6 +428,16 @@ int main(int argc, char **argv)
   if (fileName==NULL)
   {
     usage();
+  }
+  if (supplied_seed)
+  {
+    printf("[+] supplied seed: %d\n",supplied_seed);
+    srand(supplied_seed);
+  } else
+  {
+    int seed = time(NULL);
+    printf("[+] seed: %d\n", seed);
+    srand(seed);
   }
   printf("[+] opening: %s\n", fileName);
   fp = fopen(fileName,"r");

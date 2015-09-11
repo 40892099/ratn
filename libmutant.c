@@ -1,6 +1,7 @@
 /* basic mutation stuff */
 
 #include <stdlib.h>
+
 #define FUZZ_RATIO_PC 0.05
 
 unsigned char* do_fuzz2(unsigned char *databuf, unsigned int data_buffer_len)

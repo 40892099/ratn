@@ -11,7 +11,5 @@ todo
 - implement UDP
 - event/poll IO
 - metrics, performance stats
-- UI better than dots
 - more L3,L4 network
 - server coverage tracing
- 
