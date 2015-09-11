@@ -1,19 +1,15 @@
 todo
 
-- specific byte-range-offset mutation (target specific part of proto)
-
+- specific byte-range-offset mutation - target specific part of proto (libmutant)
 - configurable percent-mutate
-- different mutate strategies (radamsa)
+- different mutate strategies (radamsa)/libmutant
 
 - backoff/timeout for connect
-- disk full: stop :-/
 - remote ssh process/log watch
 
 - wait for response
-- more packets
-- different mutations
 - implement UDP
-- async IO
+- event/poll IO
 - metrics, performance stats
 - UI better than dots
 - more L3,L4 network

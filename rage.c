@@ -330,6 +330,9 @@ void begin_fuzzer(int portnum, char *target_host)
   unsigned char *data_buffer;
   unsigned int data_buffer_len;
   int i=0;
+  int outbuflen=0;
+  char outbuffer[64];
+  int packets_sent=0;
   if (portnum==0)
   {
     strcpy(port_print,"ALL");
@@ -350,8 +353,17 @@ void begin_fuzzer(int portnum, char *target_host)
       }
       data_buffer = ascii_to_binary(current->hexdata);
       data_buffer_len = (strlen(current->hexdata)/2);
-      printf(".");
-      fflush(stdout);
+      if (packets_sent%100==0)
+      {
+        for(;outbuflen>0;outbuflen--)
+        {
+          printf("\b");
+        }
+        sprintf(outbuffer,"Sent %d packets",packets_sent);
+        outbuflen = strlen(outbuffer);
+        printf("%s",outbuffer);
+        fflush(stdout);
+      }
       if (modify_payload)
       {
         data_buffer = do_fuzz2(data_buffer,data_buffer_len);
@@ -359,6 +371,7 @@ void begin_fuzzer(int portnum, char *target_host)
       if (debug) {printf("Attempting to send data\n");}
       usleep(send_delay*1000);
       send_packet(data_buffer,portnum,target_host,data_buffer_len);
+      packets_sent++;
       free(data_buffer);
       current=current->next;
     }
@@ -373,7 +386,7 @@ void begin_fuzzer(int portnum, char *target_host)
 int main(int argc, char **argv)
 {
   FILE *fp;
-  printf("---rage against the network---\n");
+  printf("RAGE AGAINST THE NETWORK\n");
   char *fileName = NULL;
   char *target_host = NULL;
   int portnum=0;
