@@ -4,8 +4,12 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <resolv.h>
 #include <time.h>
+
+#include "libmutant.h"
 
 int debug=0;
 int send_delay=0;
@@ -267,7 +271,7 @@ char * ascii_to_binary(char *input)
   return output;
 }
 
-unsigned char* do_fuzz(unsigned char *databuf, int data_buffer_len) //todo don't permanently wreck all the data! or are we?
+unsigned char* do_fuzz(unsigned char *databuf, int data_buffer_len) 
 {
   int bytes_to_fuzz, i,b;
   unsigned char c;
@@ -283,7 +287,7 @@ unsigned char* do_fuzz(unsigned char *databuf, int data_buffer_len) //todo don't
   return databuf;
 }
 
-send_packet(unsigned char *databuf,int portnum,char *target_host, int data_buffer_len)
+void send_packet(unsigned char *databuf,int portnum,char *target_host, int data_buffer_len)
 {
   int sockfd;
   struct sockaddr_in dest;
@@ -300,7 +304,7 @@ send_packet(unsigned char *databuf,int portnum,char *target_host, int data_buffe
   dest.sin_port = htons(portnum);
 
   //if (inet_addr(target_host, &dest.sin_addr.s_addr)==0)
-  if (inet_aton(target_host, &dest.sin_addr.s_addr)==0)
+  if (inet_aton(target_host, (struct in_addr *)&dest.sin_addr.s_addr)==0)
   {
     printf("Error with address\n");
     exit(errno);
@@ -324,7 +328,7 @@ void begin_fuzzer(int portnum, char *target_host)
 {
   char port_print[8];
   unsigned char *data_buffer;
-  int data_buffer_len;
+  unsigned int data_buffer_len;
   int i=0;
   if (portnum==0)
   {
@@ -350,7 +354,7 @@ void begin_fuzzer(int portnum, char *target_host)
       fflush(stdout);
       if (modify_payload)
       {
-        data_buffer = do_fuzz(data_buffer,data_buffer_len);
+        data_buffer = do_fuzz2(data_buffer,data_buffer_len);
       }
       if (debug) {printf("Attempting to send data\n");}
       usleep(send_delay*1000);

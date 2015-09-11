@@ -1,5 +1,7 @@
 todo
 
+- specific byte-range-offset mutation (target specific part of proto)
+
 - configurable percent-mutate
 - different mutate strategies (radamsa)
 
