@@ -1,5 +1,7 @@
 todo
 
+- code tidy up..!
+
 - specific byte-range-offset mutation - target specific part of proto (libmutant)
 - configurable percent-mutate
 - different mutate strategies (radamsa)/libmutant

@@ -18,3 +18,9 @@ a dumb protocol-unaware packet fuzzer/replayer
 * deterministic; fuzz-runs can be repeated given the seed of a prior run
 * target process monitoring is left as an excersize to the reader
 * naive unconfigurable mutations
+
+## packet file format
+todo
+
+## doing a fuzz run
+todo

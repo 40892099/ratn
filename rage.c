@@ -366,7 +366,7 @@ void begin_fuzzer(int portnum, char *target_host)
       }
       if (modify_payload)
       {
-        data_buffer = do_fuzz2(data_buffer,data_buffer_len);
+        data_buffer = do_fuzz_random(data_buffer,data_buffer_len);
       }
       if (debug) {printf("Attempting to send data\n");}
       usleep(send_delay*1000);
@@ -383,13 +383,22 @@ void begin_fuzzer(int portnum, char *target_host)
   }
 }
 
+void save_seed(int seed)
+{
+  time_t sec;
+  sec = time(NULL);
+  FILE *seedFile = fopen("seeds.log","a");
+  fprintf(seedFile,"At time: %d, seed was: %d\n",sec,seed);
+  fclose(seedFile);
+}
+
 int main(int argc, char **argv)
 {
   FILE *fp;
   printf("RAGE AGAINST THE NETWORK\n");
   char *fileName = NULL;
   char *target_host = NULL;
-  int supplied_seed =0;
+  unsigned int supplied_seed =0;
   int portnum=0;
   int c;
 	while ((c = getopt(argc, argv, "ldbf:p:t:s:r:")) != -1)
@@ -432,11 +441,13 @@ int main(int argc, char **argv)
   if (supplied_seed)
   {
     printf("[+] supplied seed: %d\n",supplied_seed);
+    save_seed(supplied_seed);
     srand(supplied_seed);
   } else
   {
-    int seed = time(NULL);
+    unsigned int seed = time(NULL);
     printf("[+] seed: %d\n", seed);
+    save_seed(seed);
     srand(seed);
   }
   printf("[+] opening: %s\n", fileName);
