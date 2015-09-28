@@ -163,7 +163,8 @@ void get_raw_from_ascii_hex(char *input, unsigned char *output)
   if (debug) {printf("debug: get_raw_from_ascii_hex\n");}
   int bytelen;
   int i;
-  bytelen = strlen(input);
+  bytelen = strlen(input); 
+  if (debug) {printf("debug: input len: %d\n",bytelen);}
 
   char *ptr;
   ptr = input;
@@ -175,10 +176,10 @@ void get_raw_from_ascii_hex(char *input, unsigned char *output)
     c1 = ascii_char_to_num(ptr[i])*16;
     c2 = ascii_char_to_num(ptr[i+1]);
     result = c1+c2;
-    //printf("[0x%02x] ",result);
+    if (debug) {printf("[0x%02x] ",result);}
     output[i/2] = (unsigned char)result;
   }
-  output[i]='\0';
+  output[i/2]='\0';
 }
 
 void printByPortNo(int portNo)

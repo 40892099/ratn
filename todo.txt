@@ -1,6 +1,11 @@
 todo
 
 - code tidy up..!
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
+
+- don't close socket.. we lose the capability to do handshake protocols
 
 - specific byte-range-offset mutation - target specific part of proto (libmutant)
 - configurable percent-mutate
