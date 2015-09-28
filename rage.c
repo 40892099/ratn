@@ -10,8 +10,9 @@
 #include <time.h>
 
 #include "libmutant.h"
+#include "rage.h"
 
-int debug=0;
+int debug =0;
 int send_delay=0;
 int print_packets=0;
 int modify_payload=1;
@@ -383,12 +384,12 @@ void begin_fuzzer(int portnum, char *target_host)
   }
 }
 
-void save_seed(int seed)
+void save_seed(int seed, char *fullCmdLine)
 {
   time_t sec;
   sec = time(NULL);
   FILE *seedFile = fopen("seeds.log","a");
-  fprintf(seedFile,"At time: %d, seed was: %d\n",sec,seed);
+  fprintf(seedFile,"At time: %d, cmd:%s seed was: %d\n",sec,fullCmdLine,seed);
   fclose(seedFile);
 }
 
@@ -401,6 +402,13 @@ int main(int argc, char **argv)
   unsigned int supplied_seed =0;
   int portnum=0;
   int c;
+  char *fullCmdLine[128];
+  strcpy(fullCmdLine,argv[0]);
+  int i;
+  for (i=1;i<argc;i++)
+  {
+    strcat(fullCmdLine,argv[i]);
+  }
 	while ((c = getopt(argc, argv, "ldbf:p:t:s:r:")) != -1)
 	{
     switch (c)
@@ -441,13 +449,13 @@ int main(int argc, char **argv)
   if (supplied_seed)
   {
     printf("[+] supplied seed: %d\n",supplied_seed);
-    save_seed(supplied_seed);
+    save_seed(supplied_seed,fullCmdLine);
     srand(supplied_seed);
   } else
   {
     unsigned int seed = time(NULL);
     printf("[+] seed: %d\n", seed);
-    save_seed(seed);
+    save_seed(seed,fullCmdLine);
     srand(seed);
   }
   printf("[+] opening: %s\n", fileName);
