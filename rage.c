@@ -316,7 +316,7 @@ void send_packet(unsigned char *databuf,int portnum,char *target_host, int data_
 
   if (connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) !=0)
   {
-    printf("Connect() error\n");
+    printf("\n\nConnect() error\n");
     exit(errno);
   }
 
@@ -408,6 +408,7 @@ int main(int argc, char **argv)
   int i;
   for (i=1;i<argc;i++)
   {
+    strcat(fullCmdLine," ");
     strcat(fullCmdLine,argv[i]);
   }
 	while ((c = getopt(argc, argv, "ldbf:p:t:s:r:")) != -1)
