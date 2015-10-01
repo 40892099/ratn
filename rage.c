@@ -388,9 +388,12 @@ void begin_fuzzer(int portnum, char *target_host)
 void save_seed(int seed, char *fullCmdLine)
 {
   time_t sec;
+  char *time_str;
   sec = time(NULL);
+  time_str = ctime(&sec);
+  time_str[strlen(time_str)-1] = '\0';
   FILE *seedFile = fopen("seeds.log","a");
-  fprintf(seedFile,"At time: %d, cmd:%s seed was: %d\n",sec,fullCmdLine,seed);
+  fprintf(seedFile,"%s, cmd:%s seed was: %d\n",time_str,fullCmdLine,seed);
   fclose(seedFile);
 }
 
