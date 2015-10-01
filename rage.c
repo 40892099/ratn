@@ -16,6 +16,7 @@ int debug =0;
 int send_delay=0;
 int print_packets=0;
 int modify_payload=1;
+int packet_loop_counter=0;
 float FUZZ_RATIO = 0.05;
 
 // global socket for reuse across send calls
@@ -28,7 +29,7 @@ struct packetDescription
   int sport;
   int dport;
   char direction[4];
-  char hexdata[10000];
+  char hexdata[10000]; // TODO fix these...
   char comment[128];
   struct packetDescription *next;
 };
@@ -105,7 +106,7 @@ void addToList(char *line)
   return;
 }
 
-// abomination, we can do better
+// TODO FFS abomination, we can do better
 int ascii_char_to_num(char c)
 {
   switch (c)
@@ -267,8 +268,6 @@ void print_all_packets(int portnum)
 
 char * ascii_to_binary(char *input)
 {
-  //unsigned char *output;
-  //output = malloc(4096*sizeof(char));
   if (debug) {printf("debug: called into ascii_to_binary with %d bytes\n",strlen(input));}
   if (debug) {printf("debug: ascii_to_binary in: %s\n",input);}
   unsigned char *output;
@@ -277,21 +276,6 @@ char * ascii_to_binary(char *input)
   return output;
 }
 
-unsigned char* do_fuzz(unsigned char *databuf, int data_buffer_len) 
-{
-  int bytes_to_fuzz, i,b;
-  unsigned char c;
-  bytes_to_fuzz = (data_buffer_len * FUZZ_RATIO);
-  if (debug) printf("buflen: %d, bytes_to_fuzz: %d\n", data_buffer_len, bytes_to_fuzz);
-  for (i=0;i<bytes_to_fuzz;i++)
-  {
-    b = rand() % data_buffer_len;
-    c = rand() % 256;
-    databuf[b] = c;
-    if (debug) {printf("Changing byte %d to 0x%x\n",b,c);}
-  }
-  return databuf;
-}
 
 void send_packet(unsigned char *databuf,int portnum,char *target_host, int data_buffer_len)
 {
@@ -308,27 +292,43 @@ void send_packet(unsigned char *databuf,int portnum,char *target_host, int data_
     exit(errno);
   }
   if (debug) {printf("Addr: %s\n",target_host);}
-  if (debug) {printf("Sending %d bytes \n",data_buffer_len); }
-  sendval = send(sockfd, databuf, data_buffer_len, 0);
+  if (debug) {printf("Send()ing %d bytes thru sock: 0x%x\n",data_buffer_len,sockfd); }
+  sendval = send(sockfd, databuf, data_buffer_len, MSG_NOSIGNAL);
   if (sendval == -1)
   {
-    if (debug) {printf("send() failed, reconnecting\n");}
+    if (debug) {printf("send() failed: %d, reconnecting\n",sendval);}
+    if (connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) !=0)
+    {
+      if (debug) {printf("\n\nConnect() error, try new socket");}
+      init_sock();
+      if (connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) !=0)
+      {
+        printf("\n\nConnect() error, exiting");
+        exit(errno);
+      }
+    }
+    sendval = send(sockfd, databuf, data_buffer_len, 0);
+    if (debug) {printf("send() retval after reconnect: %d\n",sendval);}
+  } 
+  if (debug) {printf("appears to have send() successfully\n");}
+  packet_loop_counter++;
+  if (packet_loop_counter>10)
+  {
+    packet_loop_counter=0;
     close(sockfd);
+    init_sock();
+  }
+  return;
+}
+
+void init_sock()
+{
     sockfd = socket(AF_INET,SOCK_STREAM,0);
     if (sockfd <0)
     {
       printf("Socket error\n");
       exit(errno);
     }
-    if (connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) !=0)
-    {
-      printf("\n\nConnect() error\n");
-      exit(errno);
-    }
-    sendval = send(sockfd, databuf, data_buffer_len, 0);
-    if (debug) {printf("send() retval after reconnect: %d\n",sendval);}
-  } 
-  return;
 }
 
 void begin_fuzzer(int portnum, char *target_host)
@@ -346,6 +346,7 @@ void begin_fuzzer(int portnum, char *target_host)
   } else {
     sprintf(port_print,"%d",portnum);
   }
+  init_sock();
   printf("[+] beginning fuzz run against: %s:%s\n\n",target_host,port_print);
   while (1)
   {
@@ -483,7 +484,6 @@ int main(int argc, char **argv)
   }
   getPacketDescriptions(fp);
   fclose(fp);
-  //printByPortNo(445);
   if (print_packets)
   {
     print_all_packets(portnum);

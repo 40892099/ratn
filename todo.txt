@@ -6,17 +6,14 @@ todo
 ^^^^^^^^^^^^^^^^^^
 - fix all the compiler errors!
 
-- don't close socket.. we lose the capability to do handshake protocols
 - randomize which packet is chosen to randomly string together handshake sequences
 
 - specific byte-range-offset mutation - target specific part of proto (libmutant)
 - configurable percent-mutate
 - different mutate strategies (radamsa)/libmutant
 
-- backoff/timeout for connect
 - remote ssh process/log watch
 
-- wait for response
 - implement UDP
 - event/poll IO
 - metrics, performance stats
