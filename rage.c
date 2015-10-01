@@ -18,6 +18,9 @@ int print_packets=0;
 int modify_payload=1;
 float FUZZ_RATIO = 0.05;
 
+// global socket for reuse across send calls
+int sockfd = NULL;
+
 struct packetDescription
 {
   char l3[4];
@@ -292,38 +295,39 @@ unsigned char* do_fuzz(unsigned char *databuf, int data_buffer_len)
 
 void send_packet(unsigned char *databuf,int portnum,char *target_host, int data_buffer_len)
 {
-  int sockfd;
   struct sockaddr_in dest;
-
-  sockfd = socket(AF_INET,SOCK_STREAM,0);
-  if (sockfd <0)
-  {
-    printf("Socket error\n");
-    exit(errno);
-  }
+  int sendval;
 
   bzero((char *)&dest, sizeof(dest));
   dest.sin_family = AF_INET;
   dest.sin_port = htons(portnum);
 
-  //if (inet_addr(target_host, &dest.sin_addr.s_addr)==0)
   if (inet_aton(target_host, (struct in_addr *)&dest.sin_addr.s_addr)==0)
   {
     printf("Error with address\n");
     exit(errno);
   }
   if (debug) {printf("Addr: %s\n",target_host);}
-
-  if (connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) !=0)
-  {
-    printf("\n\nConnect() error\n");
-    exit(errno);
-  }
-
   if (debug) {printf("Sending %d bytes \n",data_buffer_len); }
-  send(sockfd, databuf, data_buffer_len, 0);
-  //write(sockfd, databuf, data_buffer_len);
-  close(sockfd);
+  sendval = send(sockfd, databuf, data_buffer_len, 0);
+  if (sendval == -1)
+  {
+    if (debug) {printf("send() failed, reconnecting\n");}
+    close(sockfd);
+    sockfd = socket(AF_INET,SOCK_STREAM,0);
+    if (sockfd <0)
+    {
+      printf("Socket error\n");
+      exit(errno);
+    }
+    if (connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) !=0)
+    {
+      printf("\n\nConnect() error\n");
+      exit(errno);
+    }
+    sendval = send(sockfd, databuf, data_buffer_len, 0);
+    if (debug) {printf("send() retval after reconnect: %d\n",sendval);}
+  } 
   return;
 }
 
