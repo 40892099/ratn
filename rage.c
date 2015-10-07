@@ -17,6 +17,7 @@ int send_delay=0;
 int print_packets=0;
 int modify_payload=1;
 int packet_loop_counter=0;
+int packet_loop_counter_max=10;
 float FUZZ_RATIO = 0.05;
 
 // global socket for reuse across send calls
@@ -48,6 +49,7 @@ void usage()
   printf("        -s milliseconds  specify a send delay \n");
   printf("        -b               don't fuzz, send original packets and exit \n");
   printf("        -r               provide a seed for srand (repeat a fuzz run)\n");
+  printf("        -c               number of packets sent before forced reconnect\n");
   exit(1);
 }
 
@@ -312,7 +314,7 @@ void send_packet(unsigned char *databuf,int portnum,char *target_host, int data_
   } 
   if (debug) {printf("appears to have send() successfully\n");}
   packet_loop_counter++;
-  if (packet_loop_counter>10)
+  if (packet_loop_counter>packet_loop_counter_max)
   {
     packet_loop_counter=0;
     close(sockfd);
@@ -419,7 +421,7 @@ int main(int argc, char **argv)
     strcat(fullCmdLine," ");
     strcat(fullCmdLine,argv[i]);
   }
-	while ((c = getopt(argc, argv, "ldbf:p:t:s:r:")) != -1)
+	while ((c = getopt(argc, argv, "ldbf:p:t:s:r:c:")) != -1)
 	{
     switch (c)
     {
@@ -447,6 +449,9 @@ int main(int argc, char **argv)
         break;
       case 'r':
         supplied_seed=atoi(optarg);
+        break;
+      case 'c':
+        packet_loop_counter_max = atoi(optarg);
         break;
       default:
         abort();
